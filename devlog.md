@@ -34,3 +34,10 @@ Program now supports the load feature, and has been tested with sample input.csv
 
 Session plan:
 - implement `print` command to dump current index entries to stdout
+
+## 2025-05-06 4:50pm
+
+Program now supports the print feature, tested after the load of the csv file and successfully shows each root and number assigned to it.
+
+Session plan:
+- implement `extract` command to write all entries into a csv file

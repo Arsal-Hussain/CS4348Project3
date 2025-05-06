@@ -140,6 +140,15 @@ def load_csv(filename, csv_filename):
                 continue
             key_str, value_str = line.strip().split(',', 1)
             insert_key(filename, key_str, value_str)
+def print_index(filename):
+    with open(filename, 'rb') as f:
+        root_id, _ = read_header(f)
+        if root_id == 0:
+            print("Index is empty.")
+            return
+        node = BTreeNode.from_bytes(read_block(f, root_id))
+        for k, v in zip(node.keys, node.values):
+            print(f"{k} -> {v}")
 
 
 if __name__ == '__main__':
@@ -166,5 +175,10 @@ if __name__ == '__main__':
             print("Usage: project3 load <indexfile> <csvfile>")
         else:
             load_csv(args[2], args[3])
+    elif cmd == 'print':
+        if len(args) < 3:
+            print("Usage: project3 print <indexfile>")
+        else:
+            print_index(args[2])
     else:
         print(f"Unknown command: {cmd}")
