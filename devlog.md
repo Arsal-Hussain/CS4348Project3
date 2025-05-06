@@ -48,3 +48,10 @@ Program now supports the extract feature, tested after using test.idx file to cr
 
 Session plan:
 - Check all commands and verify it is working.
+
+## 2025-05-06 5:05pm
+
+All commands working successfully.
+
+Session plan:
+- Doing node splitting

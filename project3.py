@@ -94,9 +94,9 @@ def insert_key(filename, key, value):
         root_block = read_block(f, root_id)
         root_node = BTreeNode.from_bytes(root_block)
 
-        # Simple insertion (no split)
         if len(root_node.keys) >= MAX_KEYS:
-            print("Error: Root node full. Splitting not yet implemented.")
+            split_root(f, root_node, next_block)
+            insert_key(filename, key, value)  # Re-attempt insert
             return
 
         i = 0
@@ -112,6 +112,43 @@ def insert_key(filename, key, value):
 
         write_block(f, root_node.block_id, root_node.to_bytes())
         print("Inserted into root.")
+
+def split_root(file, root_node, next_block):
+    mid = DEGREE - 1  # Mid index = 9
+
+    # Create left child
+    left = BTreeNode(
+        block_id=next_block,
+        parent=next_block + 2,
+        keys=root_node.keys[:mid],
+        values=root_node.values[:mid]
+    )
+
+    # Create right child
+    right = BTreeNode(
+        block_id=next_block + 1,
+        parent=next_block + 2,
+        keys=root_node.keys[mid+1:],
+        values=root_node.values[mid+1:]
+    )
+
+    # Create new root
+    new_root = BTreeNode(
+        block_id=next_block + 2,
+        parent=0,
+        keys=[root_node.keys[mid]],
+        values=[root_node.values[mid]],
+        children=[left.block_id, right.block_id] + [0] * (MAX_CHILDREN - 2)
+    )
+
+    # Write all three blocks
+    write_block(file, left.block_id, left.to_bytes())
+    write_block(file, right.block_id, right.to_bytes())
+    write_block(file, new_root.block_id, new_root.to_bytes())
+
+    # Update header
+    write_header(file, root=new_root.block_id, next_block=new_root.block_id + 1)
+    print(f"Root split: new root = {new_root.block_id}, children = {left.block_id}, {right.block_id}")
 
 def search_key(filename, key):
     key = int(key)
