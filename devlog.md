@@ -17,3 +17,12 @@ Initial plan:
 - Implement the `create` command and header logic
 - Make sure files initialize correctly with the header format
 
+## 2025-05-06 4:30pm
+
+Implementing node splitting will be tricky with limited memory. Will focus on basic root insertion today. Might create a helper class `BTreeNode`.
+
+Session plan:
+- Implement the `insert` command
+- Create and write a single root node
+- Prevent duplicate keys
+- No splitting yet — just insert if space allows
