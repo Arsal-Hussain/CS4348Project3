@@ -1,0 +1,152 @@
+import sys
+import os
+import struct
+
+BLOCK_SIZE = 512
+MAGIC = b'4348PRJ3'
+DEGREE = 10
+MAX_KEYS = 2 * DEGREE - 1
+MAX_CHILDREN = 2 * DEGREE
+
+def int_to_bytes(n):
+    return n.to_bytes(8, 'big')
+
+def bytes_to_int(b):
+    return int.from_bytes(b, 'big')
+
+def pad_block(data):
+    return data + b'\x00' * (BLOCK_SIZE - len(data))
+
+class BTreeNode:
+    def __init__(self, block_id=0, parent=0, keys=None, values=None, children=None):
+        self.block_id = block_id
+        self.parent = parent
+        self.keys = keys or []
+        self.values = values or []
+        self.children = children or [0] * MAX_CHILDREN
+
+    def to_bytes(self):
+        b = int_to_bytes(self.block_id)
+        b += int_to_bytes(self.parent)
+        b += int_to_bytes(len(self.keys))
+
+        b += b''.join([int_to_bytes(k) for k in self.keys] + [b'\x00' * 8] * (MAX_KEYS - len(self.keys)))
+        b += b''.join([int_to_bytes(v) for v in self.values] + [b'\x00' * 8] * (MAX_KEYS - len(self.values)))
+        b += b''.join([int_to_bytes(c) for c in self.children])
+        return pad_block(b)
+
+    @staticmethod
+    def from_bytes(data):
+        block_id = bytes_to_int(data[0:8])
+        parent = bytes_to_int(data[8:16])
+        num_keys = bytes_to_int(data[16:24])
+        keys = [bytes_to_int(data[24+i*8:32+i*8]) for i in range(MAX_KEYS)]
+        values = [bytes_to_int(data[176+i*8:184+i*8]) for i in range(MAX_KEYS)]
+        children = [bytes_to_int(data[328+i*8:336+i*8]) for i in range(MAX_CHILDREN)]
+        return BTreeNode(block_id, parent, keys[:num_keys], values[:num_keys], children)
+
+def read_block(file, block_id):
+    file.seek(block_id * BLOCK_SIZE)
+    return file.read(BLOCK_SIZE)
+
+def write_block(file, block_id, data):
+    file.seek(block_id * BLOCK_SIZE)
+    file.write(data)
+
+def create_index(filename):
+    if os.path.exists(filename):
+        print("Error: File already exists.")
+        return
+    with open(filename, 'wb') as f:
+        header = MAGIC + int_to_bytes(0) + int_to_bytes(1)
+        f.write(pad_block(header))
+    print(f"{filename} created.")
+
+def read_header(file):
+    file.seek(0)
+    header = file.read(BLOCK_SIZE)
+    if header[:8] != MAGIC:
+        raise Exception("Invalid index file")
+    root = bytes_to_int(header[8:16])
+    next_block = bytes_to_int(header[16:24])
+    return root, next_block
+
+def write_header(file, root, next_block):
+    file.seek(0)
+    header = MAGIC + int_to_bytes(root) + int_to_bytes(next_block)
+    file.write(pad_block(header))
+
+def insert_key(filename, key, value):
+    key = int(key)
+    value = int(value)
+    with open(filename, 'r+b') as f:
+        root_id, next_block = read_header(f)
+
+        if root_id == 0:
+            root_node = BTreeNode(block_id=1)
+            root_node.keys.append(key)
+            root_node.values.append(value)
+            write_block(f, 1, root_node.to_bytes())
+            write_header(f, root=1, next_block=2)
+            print("Inserted into new root.")
+            return
+
+        root_block = read_block(f, root_id)
+        root_node = BTreeNode.from_bytes(root_block)
+
+        # Simple insertion (no split)
+        if len(root_node.keys) >= MAX_KEYS:
+            print("Error: Root node full. Splitting not yet implemented.")
+            return
+
+        i = 0
+        while i < len(root_node.keys) and key > root_node.keys[i]:
+            i += 1
+
+        if i < len(root_node.keys) and root_node.keys[i] == key:
+            print("Error: Duplicate key.")
+            return
+
+        root_node.keys.insert(i, key)
+        root_node.values.insert(i, value)
+
+        write_block(f, root_node.block_id, root_node.to_bytes())
+        print("Inserted into root.")
+
+def search_key(filename, key):
+    key = int(key)
+    with open(filename, 'rb') as f:
+        root_id, _ = read_header(f)
+        if root_id == 0:
+            print("Empty tree.")
+            return
+
+        block = read_block(f, root_id)
+        node = BTreeNode.from_bytes(block)
+        for i, k in enumerate(node.keys):
+            if k == key:
+                print(f"Found: {k} -> {node.values[i]}")
+                return
+        print("Key not found.")
+
+if __name__ == '__main__':
+    args = sys.argv
+    if len(args) < 3:
+        print("Usage: project3 <command> <filename> [args...]")
+        sys.exit(1)
+
+    cmd = args[1]
+    if cmd == 'create':
+        create_index(args[2])
+    elif cmd == 'insert':
+        if len(args) < 5:
+            print("Usage: project3 insert <file> <key> <value>")
+        else:
+            insert_key(args[2], args[3], args[4])
+    elif cmd == 'search':
+        if len(args) < 4:
+            print("Usage: project3 search <file> <key>")
+        else:
+            search_key(args[2], args[3])
+    else:
+        print(f"Unknown command: {cmd}")
