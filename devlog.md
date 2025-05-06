@@ -26,3 +26,11 @@ Session plan:
 - Create and write a single root node
 - Prevent duplicate keys
 - No splitting yet — just insert if space allows
+- look into `load` command
+
+## 2025-05-06 4:40pm
+
+Program now supports the load feature, and has been tested with sample input.csv file which was then searched on the test.idx successfully.
+
+Session plan:
+- implement `print` command to dump current index entries to stdout

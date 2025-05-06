@@ -129,6 +129,19 @@ def search_key(filename, key):
                 return
         print("Key not found.")
 
+def load_csv(filename, csv_filename):
+    if not os.path.exists(csv_filename):
+        print("Error: CSV file does not exist.")
+        return
+
+    with open(csv_filename, 'r') as csvfile:
+        for line in csvfile:
+            if ',' not in line:
+                continue
+            key_str, value_str = line.strip().split(',', 1)
+            insert_key(filename, key_str, value_str)
+
+
 if __name__ == '__main__':
     args = sys.argv
     if len(args) < 3:
@@ -148,5 +161,10 @@ if __name__ == '__main__':
             print("Usage: project3 search <file> <key>")
         else:
             search_key(args[2], args[3])
+    elif cmd == 'load':
+        if len(args) < 4:
+            print("Usage: project3 load <indexfile> <csvfile>")
+        else:
+            load_csv(args[2], args[3])
     else:
         print(f"Unknown command: {cmd}")
