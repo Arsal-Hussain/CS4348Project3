@@ -41,3 +41,10 @@ Program now supports the print feature, tested after the load of the csv file an
 
 Session plan:
 - implement `extract` command to write all entries into a csv file
+
+## 2025-05-06 5:00pm
+
+Program now supports the extract feature, tested after using test.idx file to create output.csv, with all the roots and numbers separated by comma.
+
+Session plan:
+- Check all commands and verify it is working.

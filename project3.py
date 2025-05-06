@@ -149,7 +149,20 @@ def print_index(filename):
         node = BTreeNode.from_bytes(read_block(f, root_id))
         for k, v in zip(node.keys, node.values):
             print(f"{k} -> {v}")
+def extract_csv(indexfile, out_csv):
+    if os.path.exists(out_csv):
+        print("Error: Output file already exists.")
+        return
 
+    with open(indexfile, 'rb') as f:
+        root_id, _ = read_header(f)
+        if root_id == 0:
+            print("Index is empty.")
+            return
+        node = BTreeNode.from_bytes(read_block(f, root_id))
+        with open(out_csv, 'w') as out:
+            for k, v in zip(node.keys, node.values):
+                out.write(f"{k},{v}\n")
 
 if __name__ == '__main__':
     args = sys.argv
@@ -180,5 +193,10 @@ if __name__ == '__main__':
             print("Usage: project3 print <indexfile>")
         else:
             print_index(args[2])
+    elif cmd == 'extract':
+        if len(args) < 4:
+            print("Usage: project3 extract <indexfile> <csvfile>")
+        else:
+            extract_csv(args[2], args[3])
     else:
         print(f"Unknown command: {cmd}")
