@@ -5,6 +5,8 @@ This project implements a disk-based B-tree index system using fixed-size 512-by
 
 The B-tree uses a minimum degree (`t`) of 10, with each node supporting up to 19 keys and 20 children. Blocks are written and read in big-endian format.
 
+Please note: the input.csv file has been included in submission to be used to load, but the test.idx file and output.csv must be generated through the commands.
+
 ## Commands
 
 ```bash
