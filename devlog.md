@@ -66,3 +66,11 @@ Fixed node splitting, debugged improper recursion by separating root split from 
 added split child and recursive insert into node logic for proper B tree growth
 updated search and print to recursively traverse tree nodes
 verified correct behavior with multilevel b tree: split, searches, and printing all worked
+
+## 2025-05-06 11:00pm
+
+- Confirmed functionality of all required commands: `create`, `insert`, `load`, `search`, `print`, and `extract`.
+- Verified multi-level B-tree behavior through test inputs and recursive traversal logic.
+- Cleaned up output and ensured edge cases were handled (e.g., duplicate key rejection).
+- Created sample input file and tested full flow from CSV load to extraction.
+- Prepared devlog, organized project folder, and validated all deliverables for submission.
