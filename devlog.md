@@ -55,3 +55,7 @@ All commands working successfully.
 
 Session plan:
 - Doing node splitting
+
+## 2025-05-06 10:34pm
+
+Continuing session for today, combating with the node splitting.
