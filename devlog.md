@@ -59,3 +59,10 @@ Session plan:
 ## 2025-05-06 10:34pm
 
 Continuing session for today, combating with the node splitting.
+
+## 2025-05-06 10:48pm
+
+Fixed node splitting, debugged improper recursion by separating root split from general node insertion.
+added split child and recursive insert into node logic for proper B tree growth
+updated search and print to recursively traverse tree nodes
+verified correct behavior with multilevel b tree: split, searches, and printing all worked
